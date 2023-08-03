@@ -19,8 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
+import megh.xuiu.xuiubrowser.data.desktop_site
 import megh.xuiu.xuiubrowser.data.loading
 import megh.xuiu.xuiubrowser.data.url
+import megh.xuiu.xuiubrowser.data.userAgent
+import megh.xuiu.xuiubrowser.data.userAgentDesktop
 import megh.xuiu.xuiubrowser.data.webView
 
 @SuppressLint("UnrememberedMutableState")
@@ -39,10 +42,26 @@ fun WebContent(paddingValues: PaddingValues, navController: NavHostController) {
             WebView(it).apply {
                 layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
                 webViewClient = webViewClient
+                userAgent = settings.userAgentString.toString()
                 settings.apply {
                     javaScriptCanOpenWindowsAutomatically = true
                     javaScriptEnabled = true
                     loadsImagesAutomatically = true
+                }
+                if (desktop_site.value){
+
+                    settings.apply {
+                        userAgentString= userAgentDesktop.value
+                        builtInZoomControls = true
+                    }
+                    webView?.reload()
+                }
+                else{
+                    settings.apply {
+                        userAgentString = userAgent
+                        builtInZoomControls= true
+                    }
+                    webView?.reload()
                 }
                 loadUrl(urlForWeb)
                 webView = this
@@ -60,7 +79,21 @@ fun WebContent(paddingValues: PaddingValues, navController: NavHostController) {
             }
         },
             update = {
+                if (desktop_site.value){
+                    it.settings.apply {
+                        userAgentString= userAgentDesktop.value
+                        builtInZoomControls = true
+                    }
+                }
+                else{
+                    it.settings.apply {
+                        userAgentString = userAgent
+                        builtInZoomControls = false
+                    }
+
+                }
                 it.loadUrl(urlForWeb)
+
             })
     }
 }

@@ -31,11 +31,17 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +50,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
 import megh.xuiu.xuiubrowser.R
 import megh.xuiu.xuiubrowser.data.ScreenData
 import megh.xuiu.xuiubrowser.data.active
@@ -60,7 +67,10 @@ import megh.xuiu.xuiubrowser.ui.screens.content.WebContent
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun Web(navController: NavHostController) {
-
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+    var scope = rememberCoroutineScope()
     if (alert.value){
         AlertDialog(
             title = { Text(text = "⚠️ Unsafe ⚠️")},
@@ -142,13 +152,13 @@ fun Web(navController: NavHostController) {
                                      DropdownMenuItem(
                                          leadingIcon = { Icon(modifier = Modifier.size(20.dp), painter = painterResource(id = R.drawable.incognito), contentDescription = null) },
                                          text = { Text(text = "New Incognito tab") },
-                                         onClick = { /*TODO*/ }
+                                         onClick = { scope.launch { snackbarHostState.showSnackbar("Please wait 1 more day ❤️", withDismissAction = true, duration = SnackbarDuration.Short) } }
                                      )
                                      Divider()
                                      DropdownMenuItem(
                                          leadingIcon = { Icon(painter = painterResource(id = R.drawable.download_done), contentDescription = null) },
                                          text = { Text(text = "Downloads") },
-                                         onClick = { /*TODO*/ }
+                                         onClick = { scope.launch { snackbarHostState.showSnackbar("This is still in development", withDismissAction = true, duration = SnackbarDuration.Short) } }
                                      )
                                      Divider()
                                      DropdownMenuItem(
@@ -159,7 +169,7 @@ fun Web(navController: NavHostController) {
                                      DropdownMenuItem(
                                          leadingIcon = { Icon(painter = painterResource(id = R.drawable.baseline_find_in_page), contentDescription = null) },
                                          text = { Text(text = "Find in page") },
-                                         onClick = { /*TODO*/ }
+                                         onClick = { scope.launch { snackbarHostState.showSnackbar("This is still in development", withDismissAction = true, duration = SnackbarDuration.Short) } }
                                      )
                                      DropdownMenuItem(
                                          leadingIcon = { Icon(painter = painterResource(id = R.drawable.desktop_windows), contentDescription = null) },
@@ -227,6 +237,9 @@ fun Web(navController: NavHostController) {
             FloatingActionButton(onClick = { webView?.reload() }) {
                 Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
             }
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
         }
     )
     BackHandler {

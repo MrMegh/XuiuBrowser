@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.AlertDialog
@@ -21,30 +23,45 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import megh.xuiu.xuiubrowser.R
 import megh.xuiu.xuiubrowser.data.ScreenData
 import megh.xuiu.xuiubrowser.data.alert
+import megh.xuiu.xuiubrowser.data.card
 import megh.xuiu.xuiubrowser.data.query
 import megh.xuiu.xuiubrowser.data.search_history
+import megh.xuiu.xuiubrowser.data.sheetState
 import megh.xuiu.xuiubrowser.data.url
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(paddingValues: PaddingValues ,navController: NavHostController) {
-
+    if (sheetState.value){
+        ModalBottomSheet(sheetState= rememberModalBottomSheetState(),onDismissRequest = { sheetState.value = false }) {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .height(500.dp))
+        }
+    }
     //Alert dialog for unsafe query
     if (alert.value){
         AlertDialog(
@@ -80,7 +97,9 @@ fun HomeContent(paddingValues: PaddingValues ,navController: NavHostController) 
         item{
                 Text(modifier = Modifier.padding(top = 50.dp, bottom = 30.dp),fontSize = 40.sp, fontFamily = FontFamily.Default, text = "Xuiu")
                 SearchBar(
-                    modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
                     placeholder = { Text(text = "Search or type web address")},
                     query = query.value,
                     onQueryChange = { query.value= it},
@@ -118,14 +137,27 @@ fun HomeContent(paddingValues: PaddingValues ,navController: NavHostController) 
                     }
                 ) {}
 
-            for (i in 1..10){
+            for (i in 0 until card.size){
                 Card(modifier = Modifier
-                    .width(400.dp)
+                    .width(340.dp)
                     .padding(8.dp)
                     .height(200.dp), onClick = { /*TODO*/ }) {
+                    Box(modifier = Modifier.fillMaxSize().padding(10.dp)){
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(card[i])
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "stringResource(R.string.description)",
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(15.dp))
+                                .fillMaxSize()
+                        )
+                    }
 
                 }
-                Divider(modifier = Modifier.width(350.dp))
+                Divider(modifier = Modifier.width(300.dp))
             }
 
         }

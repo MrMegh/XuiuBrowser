@@ -3,6 +3,9 @@ package megh.xuiu.xuiubrowser.ui.screens
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -16,14 +19,21 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,10 +43,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
 import megh.xuiu.xuiubrowser.R
+import megh.xuiu.xuiubrowser.data.active
 import megh.xuiu.xuiubrowser.data.backCount
 import megh.xuiu.xuiubrowser.data.desktop_site
 import megh.xuiu.xuiubrowser.data.search_history
+import megh.xuiu.xuiubrowser.data.sheetState
 import megh.xuiu.xuiubrowser.data.visible
 import megh.xuiu.xuiubrowser.ui.screens.content.HomeContent
 import kotlin.system.exitProcess
@@ -46,6 +59,14 @@ import kotlin.system.exitProcess
 @Composable
 fun Home(navController: NavHostController) {
     var scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+    val scope = rememberCoroutineScope()
+
+
+
+
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -71,13 +92,13 @@ fun Home(navController: NavHostController) {
                             DropdownMenuItem(
                                 leadingIcon = { Icon(modifier = Modifier.size(20.dp), painter = painterResource(id = R.drawable.incognito), contentDescription = null) },
                                 text = { Text(text = "New Incognito tab") },
-                                onClick = { /*TODO*/ }
+                                onClick = { scope.launch { snackbarHostState.showSnackbar("Please wait 1 more day ❤️", withDismissAction = true, duration = SnackbarDuration.Short) } }
                             )
                             Divider()
                             DropdownMenuItem(
                                 leadingIcon = { Icon(painter = painterResource(id = R.drawable.download_done), contentDescription = null) },
                                 text = { Text(text = "Downloads") },
-                                onClick = { /*TODO*/ }
+                                onClick = { scope.launch { snackbarHostState.showSnackbar("This is still in development", withDismissAction = true, duration = SnackbarDuration.Short) } }
                             )
                             Divider()
                             DropdownMenuItem(
@@ -88,7 +109,7 @@ fun Home(navController: NavHostController) {
                             DropdownMenuItem(
                                 leadingIcon = { Icon(painter = painterResource(id = R.drawable.baseline_find_in_page), contentDescription = null) },
                                 text = { Text(text = "Find in page") },
-                                onClick = { /*TODO*/ }
+                                onClick = { scope.launch { snackbarHostState.showSnackbar("This is still in development", withDismissAction = true, duration = SnackbarDuration.Short) } }
                             )
                             DropdownMenuItem(
                                 leadingIcon = { Icon(painter = painterResource(id = R.drawable.desktop_windows), contentDescription = null) },
@@ -102,7 +123,10 @@ fun Home(navController: NavHostController) {
                             DropdownMenuItem(
                                 leadingIcon = {Icon(painter = painterResource(id = R.drawable.settings), contentDescription =null )},
                                 text = { Text(text = "Settings") },
-                                onClick = { /*TODO*/ }
+                                onClick = {
+                                    sheetState.value = true
+                                    visible.value = false
+                                }
                             )
                             DropdownMenuItem(
                                 leadingIcon = { Icon(painter = painterResource(id = R.drawable.help), contentDescription = null) },
@@ -115,7 +139,7 @@ fun Home(navController: NavHostController) {
                         Icon(imageVector = Icons.Outlined.AccountCircle, contentDescription = null)
                     }
                     IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Outlined.Add, contentDescription = null)
+                        Icon(painter = painterResource(id = R.drawable.tab), contentDescription =null )
                     }
                     IconButton(onClick = { visible.value = true }) {
                         Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = null)
@@ -124,6 +148,8 @@ fun Home(navController: NavHostController) {
             )
         },
         content = { HomeContent(paddingValues = it, navController = navController) },
+        snackbarHost = { SnackbarHost(snackbarHostState)
+        }
     )
     val context = LocalContext.current
     BackHandler {
