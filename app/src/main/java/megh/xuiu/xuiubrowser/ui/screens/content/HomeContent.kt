@@ -2,6 +2,7 @@
 
 package megh.xuiu.xuiubrowser.ui.screens.content
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -23,20 +23,20 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -48,51 +48,18 @@ import megh.xuiu.xuiubrowser.data.alert
 import megh.xuiu.xuiubrowser.data.card
 import megh.xuiu.xuiubrowser.data.query
 import megh.xuiu.xuiubrowser.data.search_history
-import megh.xuiu.xuiubrowser.data.sheetState
 import megh.xuiu.xuiubrowser.data.url
+import megh.xuiu.xuiubrowser.ui.components.Alert
+import megh.xuiu.xuiubrowser.ui.components.Settings
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun HomeContent(paddingValues: PaddingValues ,navController: NavHostController) {
-    if (sheetState.value){
-        ModalBottomSheet(sheetState= rememberModalBottomSheetState(),onDismissRequest = { sheetState.value = false }) {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .height(500.dp))
-        }
-    }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Settings()
     //Alert dialog for unsafe query
-    if (alert.value){
-        AlertDialog(
-            title = { Text(text = "⚠️ Unsafe ⚠️")},
-            onDismissRequest = { alert.value = true },
-            confirmButton = {
-                FilledTonalButton(
-                    colors= ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    onClick = {
-                        url.value = query.value
-                        navController.navigate(ScreenData.WebScreen.route)
-                        search_history.add(url.value)
-                        alert.value = false
-                    }
-                ) {
-                    Text(text = "proceed")
-                }
-            },
-            dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    query.value = ""
-                                    alert.value = false
-                                }
-                            ) {
-                                Text(text = "cancel")
-                            }
-            },
-            text = { Text(text = "The ${query.value} you are visiting is not safe !")}
-        )
-    }
+    Alert(navController = navController)
     LazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = paddingValues.calculateTopPadding()), content = {
         item{
                 Text(modifier = Modifier.padding(top = 50.dp, bottom = 30.dp),fontSize = 40.sp, fontFamily = FontFamily.Default, text = "Xuiu")
@@ -125,7 +92,7 @@ fun HomeContent(paddingValues: PaddingValues ,navController: NavHostController) 
                     onActiveChange = {},
                     trailingIcon = {
                         if (query.value.isBlank()){
-                            IconButton(onClick = { /*TODO*/ }) {
+                            IconButton(onClick = {keyboardController?.showSoftwareKeyboard()  }) {
                                 Icon(painter = painterResource(id = R.drawable.mic), contentDescription =null )
                             }
                         }
@@ -142,7 +109,7 @@ fun HomeContent(paddingValues: PaddingValues ,navController: NavHostController) 
                     .width(340.dp)
                     .padding(8.dp)
                     .height(200.dp), onClick = { /*TODO*/ }) {
-                    Box(modifier = Modifier.fillMaxSize().padding(10.dp)){
+                    Box(modifier = Modifier.fillMaxSize()){
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(card[i])

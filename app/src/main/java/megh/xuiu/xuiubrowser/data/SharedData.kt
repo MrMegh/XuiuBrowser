@@ -28,4 +28,7 @@ var userAgentDesktop = mutableStateOf("Mozilla/5.0 (Windows NT 10.0; Win64; x64)
 var userAgent = ""
 var sheetState = mutableStateOf(false)
 val card = arrayListOf<String>("https://picsum.photos/600/350","https://picsum.photos/600/355","https://picsum.photos/600/360","https://picsum.photos/600/365","https://picsum.photos/600/350","https://picsum.photos/600/370","https://picsum.photos/600/375","https://picsum.photos/600/380","https://picsum.photos/600/385","https://picsum.photos/600/390",)
-
+var scriptSwitch = mutableStateOf(true)
+var zoomSwitch = mutableStateOf(true)
+var imageSwitch = mutableStateOf(true)
+var profile = mutableStateOf(false)
